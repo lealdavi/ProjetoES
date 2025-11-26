@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Treino</title>
+</head>
+<body>
+    <h1>Cadastrar exercício para o treino aluno</h1>
+
+    <form action="/add_treino" method="POST">
+
+        {% if usuarios_selecionados %}
+            {% for id in usuarios_selecionados %}
+                <input type="hidden" name="usuarios_ids" value="{{ id }}">
+            {% endfor %}
+        {% endif %}
+
+        <p>Selecione os dias:</p>
+        <select name="dias" multiple>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="G">G</option>
+        </select>
+        <br><br>
+
+        <p>Selecione os exercícios:</p>
+
+        {% for exercicio in resultado %}
+            <label>
+                <input type="checkbox" name="exercicios_selecionados" value="{{ exercicio['Id'] }}">
+                {{ exercicio['Nome'] }} ({{ exercicio['Musculos trabalhados'] }})
+            </label>
+            <br><br>
+            <label>Número de séries:</label>
+            <input type="number" name="series">
+            <br><br>
+
+            <label>Número de repetições:</label>
+            <input type="number" name="repeticoes">
+            <br><br>
+
+            <label>Intervalo entre séries (segundos):</label>
+            <input type="number" name="intervalo">
+            <br><br><br><br>
+        {% endfor %}
+
+        <br><br>
+
+        <input type="submit" value="Enviar">
+    </form>
+</body>
+</html>
