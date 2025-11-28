@@ -11,14 +11,27 @@
 
         <input type="hidden" name="id_aluno" value="{{ id_aluno }}">
 
-        <p>Selecione os dias:</p>
-        <select name="dias_treino" multiple>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="E">E</option>
-        </select>
+        <p>Selecione o dia:</p>
+
+        <label>
+            <input type="radio" name="dia_treino" value="A" required> Dia A
+        </label>
+
+        <label>
+            <input type="radio" name="dia_treino" value="B" required> Dia B
+        </label>
+
+        <label>
+            <input type="radio" name="dia_treino" value="C" required> Dia C
+        </label>
+
+        <label>
+            <input type="radio" name="dia_treino" value="D" required> Dia D
+        </label>
+
+        <label>
+            <input type="radio" name="dia_treino" value="E" required> Dia E
+        </label>
 
         <hr>
         <p>Lista de Exercícios:</p>
@@ -26,19 +39,19 @@
         {% for exercicio in resultado %}
 
             <label>
-                <input type="checkbox" name="exercicios_selecionados" value="{{ exercicio['id'] }}">
+                <input type="checkbox" name="exercicios_selecionados" value="{{ exercicio['id_exercicio'] }}">
                 <strong>{{ exercicio['nome'] }}</strong>
             </label>
             <br>
 
             <label>Séries:</label>
-            <input type="number" name="series_{{ exercicio['id'] }}">
+            <input type="number" name="series_{{ exercicio['id_exercicio'] }}">
 
             <label>Repetições:</label>
-            <input type="number" name="repeticoes_{{ exercicio['id'] }}">
+            <input type="number" name="repeticoes_{{ exercicio['id_exercicio'] }}">
 
             <label>Intervalo (s):</label>
-            <input type="number" name="intervalo_{{ exercicio['id'] }}">
+            <input type="number" name="intervalo_{{ exercicio['id_exercicio'] }}">
             <br><br>
 
         {% endfor %}

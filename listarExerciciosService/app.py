@@ -20,7 +20,7 @@ def pegar_exercicios():
 
     cursor = conexao.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-    cursor.execute("SELECT * FROM exercicios")
+    cursor.execute("SELECT * FROM exercicio")
     resultado = cursor.fetchall()
 
     cursor.close()
