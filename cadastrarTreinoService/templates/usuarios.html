@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <title>Selecionar Aluno</title>
@@ -10,13 +10,16 @@
 
     <form action="/lista_exercicios" method="POST">
 
-        {% for usuario in resultado %}
-            <label>
-                <input type="radio" name="usuarios_selecionados" value="{{ usuario['idUsuarios'] }}" required>
-                {{ usuario['Nome'] }}
-            </label>
-            <br><br>
-        {% endfor %}
+        {% if resultado %}
+            {% for usuario in resultado %}
+                <label>
+                    <input type="radio" name="usuarios_selecionados" value="{{ usuario['id'] }}" required>
+
+                    {{ usuario['nome'] }}
+                </label>
+                <br><br>
+            {% endfor %}
+        {% endif %}
 
         <input type="submit" value="Avançar para Exercícios">
     </form>
