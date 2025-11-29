@@ -5,17 +5,17 @@
     <title>Avaliação Física</title>
 </head>
 <body>
-    <h1>Avaliação física</h1>
+    <h1>Avaliação física de {{aluno[1]}}</h1>
 
     {% if resultado %}
-        <p><b>Idade:</b> {{ resultado[0] }} anos</p>
-        <p><b>Peso:</b> {{ resultado[1] }} kg</p>
-        <p><b>Altura:</b> {{ resultado[2] }} cm</p>
-        <p><b>Nível:</b> {{ resultado[3] }}</p>
-        <p><b>Frequência:</b> {{ resultado[4] }} vezes por semana</p>
-        <p><b>Doenças:</b> {{ resultado[5] }}</p>
-        <p><b>Limitações:</b> {{ resultado[6] }}</p>
-        <p><b>Nível de Treino:</b> {{ resultado[7] }}</p>
+        <p><b>Idade:</b> {{ resultado[1] }} anos</p>
+        <p><b>Peso:</b> {{ resultado[2] }} kg</p>
+        <p><b>Altura:</b> {{ resultado[3] }} cm</p>
+        <p><b>Nível:</b> {{ resultado[4] }}</p>
+        <p><b>Frequência:</b> {{ resultado[5] }} vezes por semana</p>
+        <p><b>Doenças:</b> {{ resultado[6] }}</p>
+        <p><b>Limitações:</b> {{ resultado[7] }}</p>
+        <p><b>Nível de Treino:</b> {{ resultado[8] }}</p>
     {% endif %}
 
 <a href="/cadastrar">Voltar</a>

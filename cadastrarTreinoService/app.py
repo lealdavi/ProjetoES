@@ -55,17 +55,22 @@ def mostrar_avaliacao_medica():
     cursor = conexao.cursor()
 
     comando = "SELECT * FROM avaliacao_fisica WHERE id_usuario = %s"
-
     valores = (id_aluno,)
 
     cursor.execute(comando, valores)
 
     avaliacao = cursor.fetchone()
 
+    comando = "SELECT * FROM usuario WHERE id_usuario = %s"
+    valores = (id_aluno,)
+
+    cursor.execute(comando, valores)
+    aluno = cursor.fetchone()
+
     conexao.close()
     cursor.close()
 
-    return render_template("avaliacaoFisica.html", resultado=avaliacao, id_aluno=id_aluno)
+    return render_template("avaliacaoFisica.html", resultado=avaliacao, aluno = aluno, id_aluno=id_aluno)
 
 
 @app.route("/lista_exercicios", methods=["GET", "POST"])
