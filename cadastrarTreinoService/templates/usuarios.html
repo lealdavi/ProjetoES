@@ -12,11 +12,15 @@
 
         {% if resultado %}
             {% for usuario in resultado %}
+                {% if usuario['data_cadastro'] %}
                 <label>
                     <input type="radio" name="usuario_selecionado" value="{{ usuario['id_usuario'] }}" required>
                     {{ usuario['nome'] }}
+                    <br>
+                    (Última avaliação: {{ usuario['data_cadastro'] }})
                 </label>
                 <br><br>
+                {% endif %}
             {% endfor %}
         {% endif %}
 

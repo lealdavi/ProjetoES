@@ -28,7 +28,7 @@ def cadastrar():
     conexao = get_db_connection()
     cursor = conexao.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-    cursor.execute("SELECT * FROM usuario")
+    cursor.execute("SELECT * FROM usuario u LEFT JOIN avaliacao_fisica a ON a.id_usuario = u.id_usuario",)
 
     resultado = cursor.fetchall()
 
