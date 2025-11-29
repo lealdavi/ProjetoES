@@ -55,7 +55,7 @@ def cadastrar():
 def finalizar():
     #chamar função de enviar email
 
-    return "Treino salvo com sucesso!"
+    return "Treino semanal personalizado cadastrado com sucesso!g"
 
 @app.route("/ver_avaliacao_medica", methods=["POST"])
 def mostrar_avaliacao_medica():
