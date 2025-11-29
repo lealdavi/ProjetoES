@@ -6,17 +6,21 @@ from flask import Flask, request, render_template
 app = Flask(__name__)
 
 class ItemTreino:
-    def __init__(self, exercicio, series, repeticoes, intervalo):
-        self.exercicio = exercicio
+    def __init__(self, id_exercicio, series, repeticoes, intervalo):
+        self.id_exercicio = id_exercicio
         self.series = series
         self.repeticoes = repeticoes
         self.intervalo = intervalo
 
+class TreinoDiario:
+    def __init__(self, tipo):
+        self.tipo = tipo
+        self.itens_treino = []
+
 class TreinoPersonalizado:
-    def __init__(self, id_treino, nivel):
+    def __init__(self, id_treino):
         self.id_treino = id_treino
-        self.nivel = nivel
-        self.itens = []
+        self.treinos_diarios = []
 
 def get_db_connection():
     return psycopg2.connect(
@@ -46,6 +50,12 @@ def cadastrar():
     conexao.close()
 
     return render_template("usuarios.html", resultado=resultado)
+
+@app.route("/finalizar")
+def finalizar():
+    #chamar função de enviar email
+
+    return "Treino salvo com sucesso!"
 
 @app.route("/ver_avaliacao_medica", methods=["POST"])
 def mostrar_avaliacao_medica():
@@ -145,8 +155,12 @@ def add_treino_dia(id_treino):
         comando_update = "UPDATE treino SET treino_c = %s WHERE id_treino = %s"
     elif dia_escolhido == "D":
         comando_update = "UPDATE treino SET treino_d = %s WHERE id_treino = %s"
-    else:
+    elif dia_escolhido == "E":
         comando_update = "UPDATE treino SET treino_e = %s WHERE id_treino = %s"
+    elif dia_escolhido == "F":
+        comando_update = "UPDATE treino SET treino_f = %s WHERE id_treino = %s"
+    else:
+        comando_update = "UPDATE treino SET treino_g = %s WHERE id_treino = %s"
 
     cursor.execute(comando_update, (id_treino_dia, id_treino))
     conexao.commit()
@@ -161,7 +175,7 @@ def add_treino_dia(id_treino):
     cursor.close()
     conexao.close()
 
-    return f"O treino {dia_escolhido} foi salvo com sucesso! <br> <a href='/cadastrar'>Novo Treino</a>"
+    return f"O treino {dia_escolhido} foi salvo com sucesso! <br> <a href='/cadastrar'>Inserir mais um treino diário</a> <br> <a href='/finalizar'>Finalizar cadastro</a>"
 
 
 def add_item_treino(qtd_series, qtd_reposicoes, qtd_intervalo, id_exercicio, id_treino_dia):
