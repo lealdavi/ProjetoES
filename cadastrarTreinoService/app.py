@@ -1,26 +1,12 @@
 import psycopg2
 import psycopg2.extras
 import requests
+from item_treino import ItemTreino
+from treino_diario import TreinoDiario
+from treino_personalizado import TreinoPersonalizado
 from flask import Flask, request, render_template
 
 app = Flask(__name__)
-
-class ItemTreino:
-    def __init__(self, id_exercicio, series, repeticoes, intervalo):
-        self.id_exercicio = id_exercicio
-        self.series = series
-        self.repeticoes = repeticoes
-        self.intervalo = intervalo
-
-class TreinoDiario:
-    def __init__(self, tipo):
-        self.tipo = tipo
-        self.itens_treino = []
-
-class TreinoPersonalizado:
-    def __init__(self, id_treino):
-        self.id_treino = id_treino
-        self.treinos_diarios = []
 
 def get_db_connection():
     return psycopg2.connect(
@@ -55,7 +41,7 @@ def cadastrar():
 def finalizar():
     #chamar função de enviar email
 
-    return "Treino semanal personalizado cadastrado com sucesso!g"
+    return "Treino semanal personalizado cadastrado com sucesso!"
 
 @app.route("/ver_avaliacao_medica", methods=["POST"])
 def mostrar_avaliacao_medica():
@@ -127,12 +113,16 @@ def add_treino():
     cursor.close()
     conexao.close()
 
-    return add_treino_dia(id_treino)
+    treino_personalizado = TreinoPersonalizado(id_treino)
+
+    return add_treino_dia(treino_personalizado)
 
 
-def add_treino_dia(id_treino):
+def add_treino_dia(treino_personalizado):
     dia_escolhido = request.form.get("dia_treino")
     exercicios_escolhidos = request.form.getlist("exercicios_selecionados")
+
+    treino_do_dia = TreinoDiario(dia_escolhido)
 
     conexao = get_db_connection()
     cursor = conexao.cursor()
@@ -162,7 +152,7 @@ def add_treino_dia(id_treino):
     else:
         comando_update = "UPDATE treino SET treino_g = %s WHERE id_treino = %s"
 
-    cursor.execute(comando_update, (id_treino_dia, id_treino))
+    cursor.execute(comando_update, (id_treino_dia, treino_personalizado.id_treino))
     conexao.commit()
 
     for id_exercicio in exercicios_escolhidos:
@@ -170,7 +160,11 @@ def add_treino_dia(id_treino):
         qtd_reposicoes = request.form.get(f"repeticoes_{id_exercicio}")
         qtd_intervalo = request.form.get(f"intervalo_{id_exercicio}")
 
-        add_item_treino(qtd_series, qtd_reposicoes, qtd_intervalo, id_exercicio, id_treino_dia)
+        item = ItemTreino(id_exercicio, qtd_series, qtd_reposicoes, qtd_intervalo)
+        treino_do_dia.itens_treino.append(item)
+
+    for item in treino_do_dia.itens_treino:
+        add_item_treino(item, id_treino_dia)
 
     cursor.close()
     conexao.close()
@@ -178,12 +172,12 @@ def add_treino_dia(id_treino):
     return f"O treino {dia_escolhido} foi salvo com sucesso! <br> <a href='/cadastrar'>Inserir mais um treino diário</a> <br> <a href='/finalizar'>Finalizar cadastro</a>"
 
 
-def add_item_treino(qtd_series, qtd_reposicoes, qtd_intervalo, id_exercicio, id_treino_dia):
+def add_item_treino(item, id_treino_dia):
     conexao = get_db_connection()
     cursor = conexao.cursor()
 
     comando = "INSERT INTO item_treino (series, repeticoes, intervalo, id_exercicio, id_treino_dia) VALUES (%s, %s, %s, %s, %s)"
-    valores = (qtd_series, qtd_reposicoes, qtd_intervalo, id_exercicio, id_treino_dia)
+    valores = (item.series, item.repeticoes, item.intervalo, item.id_exercicio, id_treino_dia)
 
     cursor.execute(comando, valores)
     conexao.commit()
