@@ -47,6 +47,26 @@ def cadastrar():
 
     return render_template("usuarios.html", resultado=resultado)
 
+@app.route("/ver_avaliacao_medica", methods=["POST"])
+def mostrar_avaliacao_medica():
+    id_aluno = request.form.get("usuario_selecionado")
+
+    conexao = get_db_connection()
+    cursor = conexao.cursor()
+
+    comando = "SELECT * FROM avaliacao_fisica WHERE id_usuario = %s"
+
+    valores = (id_aluno,)
+
+    cursor.execute(comando, valores)
+
+    avaliacao = cursor.fetchone()
+
+    conexao.close()
+    cursor.close()
+
+    return render_template("avaliacaoFisica.html", resultado=avaliacao, id_aluno=id_aluno)
+
 
 @app.route("/lista_exercicios", methods=["GET", "POST"])
 def lista_exercicios():

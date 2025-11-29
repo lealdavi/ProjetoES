@@ -8,23 +8,26 @@
     <h1>Usuários cadastrados</h1>
     <p>Selecione o aluno para criar o treino:</p>
 
-    <form action="/lista_exercicios" method="POST">
+    <form method="POST">
 
         {% if resultado %}
             {% for usuario in resultado %}
                 <label>
                     <input type="radio" name="usuario_selecionado" value="{{ usuario['id_usuario'] }}" required>
-
                     {{ usuario['nome'] }}
                 </label>
                 <br><br>
             {% endfor %}
         {% endif %}
 
-        <input type="submit" value="Avançar para Exercícios">
+        <input type="submit" value="Avançar para cadastrar Exercícios" formaction="/lista_exercicios">
+
+        <input type="submit" value="Ver avaliação médica" formaction="/ver_avaliacao_medica">
+
     </form>
 
     <br>
     <a href="/">Voltar</a>
+
 </body>
 </html>
