@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import psycopg2
 import psycopg2.extras
+from exercicios import Exercicio
 
 app = FastAPI()
 
