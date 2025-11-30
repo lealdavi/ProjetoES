@@ -40,9 +40,11 @@
 
             <label>Intervalo (s):</label>
             <input type="number" name="intervalo_{{ exercicio['id_exercicio'] }}" min="0">
-
+            
+            <!-- campo para passar o id_aluno, facilita para os outros servicos -->
+            <input type="hidden" name="id_aluno" value="{{ id_aluno }}">
+            
             <br><br>
-
         {% endfor %}
 
         <input type="submit" value="Salvar Treino">

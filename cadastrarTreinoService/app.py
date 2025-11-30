@@ -7,7 +7,7 @@ from treino_diario import TreinoDiario
 from treino_personalizado import TreinoPersonalizado
 from flask import Flask, request, render_template
 
-EMAIL_SERVICE_URL = 'http://127.0.0.1:5000' 
+EMAIL_SERVICE_URL = 'http://127.0.0.1:5001' 
 EMAIL_ENDPOINT = f'{EMAIL_SERVICE_URL}/api/notificarEmailService'
 
 app = Flask(__name__)
@@ -44,8 +44,37 @@ def cadastrar():
 @app.route("/finalizar")
 def finalizar():
     #chamar função de enviar email
+    id_aluno = request.args.get("id_aluno")
+    
+    if not id_aluno:
+        return "Erro: ID do aluno não foi encontrado na URL.", 400
+    if not id_aluno.strip():
+        return "Erro: O ID do aluno está vazio.", 400
+    
+    id_aluno_int = int(id_aluno)
+    
+    conexao = get_db_connection()
+    cursor = conexao.cursor()
 
+    comando = "SELECT email FROM usuario WHERE id_usuario = %s"
+    valores = (id_aluno_int,)
+
+    cursor.execute(comando, valores)
+
+    email_tupla = cursor.fetchone()
+
+    if not email_tupla:
+        return f"Erro: Não foi possível encontrar o e-mail do aluno com ID {id_aluno}.", 404
+        
+    conexao.close()
+    cursor.close()
+     
+    email_aluno = email_tupla[0]
+    nome_professor = "Ronnie Coleman"
+    
+    notificar(nome_professor, email_aluno)
     return "Treino semanal personalizado cadastrado com sucesso!"
+
 
 @app.route("/ver_avaliacao_medica", methods=["POST"])
 def mostrar_avaliacao_medica():
@@ -125,6 +154,7 @@ def add_treino():
 def add_treino_dia(treino_personalizado):
     dia_escolhido = request.form.get("dia_treino")
     exercicios_escolhidos = request.form.getlist("exercicios_selecionados")
+    id_aluno = request.form.get("id_aluno")
 
     treino_do_dia = TreinoDiario(dia_escolhido)
 
@@ -173,7 +203,12 @@ def add_treino_dia(treino_personalizado):
     cursor.close()
     conexao.close()
 
-    return f"O treino {dia_escolhido} foi salvo com sucesso! <br> <a href='/cadastrar'>Inserir mais um treino diário</a> <br> <a href='/finalizar'>Finalizar cadastro</a>"
+    return (
+        f"O treino {dia_escolhido} foi salvo com sucesso! <br>"
+        f"<a href='/cadastrar'>Inserir mais um treino diário</a> <br>"
+        # novamente, estou repassando o id_aluno para simplificar outros servicos 
+        f"<a href='/finalizar?id_aluno={id_aluno}'>Finalizar cadastro</a>"
+    )
 
 
 def add_item_treino(item, id_treino_dia):
@@ -196,7 +231,7 @@ def notificar(nome_professor, email_usuario):
         "nome_professor": nome_professor
     }
     
-    response = requests.post(
+    requests.post(
         EMAIL_ENDPOINT,
         json=payload,
         headers={'Content-Type': 'application/json'}
