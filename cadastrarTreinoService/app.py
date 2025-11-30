@@ -1,10 +1,14 @@
+import json
+import requests
 import psycopg2
 import psycopg2.extras
-import requests
 from item_treino import ItemTreino
 from treino_diario import TreinoDiario
 from treino_personalizado import TreinoPersonalizado
 from flask import Flask, request, render_template
+
+EMAIL_SERVICE_URL = 'http://127.0.0.1:5001' 
+EMAIL_ENDPOINT = f'{EMAIL_SERVICE_URL}/api/notificarEmailService'
 
 app = Flask(__name__)
 
@@ -40,6 +44,24 @@ def cadastrar():
 @app.route("/finalizar")
 def finalizar():
     #chamar função de enviar email
+    id_aluno = request.args.get("id_aluno")
+    
+    if not id_aluno:
+        return "Erro: ID do aluno não foi encontrado na URL.", 400
+    if not id_aluno.strip():
+        return "Erro: O ID do aluno está vazio.", 400
+    
+    id_aluno_int = int(id_aluno)
+    
+    conexao = get_db_connection()
+    cursor = conexao.cursor()
+
+    comando = "SELECT email FROM usuario WHERE id_usuario = %s"
+    valores = (id_aluno_int,)
+
+    cursor.execute(comando, valores)
+
+    email_tupla = cursor.fetchone()
 
     return f"Treino semanal personalizado cadastrado com sucesso! <br> <a href='/'>Voltar para painel do treinador</a>"
 
@@ -132,6 +154,7 @@ def add_treino():
 def add_treino_dia(treino_personalizado):
     tipo_escolhido = request.form.get("tipo_treino")
     exercicios_escolhidos = request.form.getlist("exercicios_selecionados")
+    id_aluno = request.form.get("id_aluno")
 
     for id_exercicio in exercicios_escolhidos:
         series = request.form.get(f"series_{id_exercicio}")
@@ -176,7 +199,12 @@ def add_treino_dia(treino_personalizado):
     cursor.close()
     conexao.close()
 
-    return f"O treino {tipo_escolhido} foi salvo com sucesso! <br> <a href='/cadastrar'>Inserir mais um treino diário</a> <br> <a href='/finalizar'>Finalizar cadastro treino personalizado</a>"
+    return (
+        f"O treino {dia_escolhido} foi salvo com sucesso! <br>"
+        f"<a href='/cadastrar'>Inserir mais um treino diário</a> <br>"
+        # novamente, estou repassando o id_aluno para simplificar outros servicos 
+        f"<a href='/finalizar?id_aluno={id_aluno}'>Finalizar cadastro</a>"
+    )
 
 
 def add_item_treino(item, id_treino_dia):
@@ -191,6 +219,19 @@ def add_item_treino(item, id_treino_dia):
 
     cursor.close()
     conexao.close()
+
+
+def notificar(nome_professor, email_usuario):
+    payload = {
+        "email": email_usuario,
+        "nome_professor": nome_professor
+    }
+    
+    requests.post(
+        EMAIL_ENDPOINT,
+        json=payload,
+        headers={'Content-Type': 'application/json'}
+    )
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
