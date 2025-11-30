@@ -77,7 +77,7 @@ def listar_musculos_usuario_demo():
     musculos_data = get_musculos_by_user_id(1)
     
     if not musculos_data:
-        return jsonify({"message": "Não foi possível carregar os dados ou o usuário não tem treinos associados."}), 404
+        return jsonify({"message": "O usuário não possui treinos cadastrados."}), 404
     
     return jsonify({
         "usuario_id": 1,

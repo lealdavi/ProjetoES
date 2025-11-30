@@ -31,7 +31,7 @@
         </div>
 
         <div id="error-message" class="hidden mt-8 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            Não foi possível carregar o treino. Verifique se o servidor Flask e o banco de dados estão ativos.
+            Não foi possível carregar o treino.
         </div>
         
     </div>
@@ -126,7 +126,9 @@
                 const response = await fetch(API_ENDPOINT);
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json(); 
+                    let errorMessage = errorData.message || `Erro HTTP: ${response.status}`;        
+                    throw new Error(errorMessage);
                 }
 
                 const data = await response.json();
@@ -148,6 +150,11 @@
 
             } catch (error) {
                 console.error("Erro ao buscar dados:", error);
+                const displayMessage = error.message.includes('HTTP')
+                    ? "Erro de conexão com a API. Verifique se o servidor está rodando."
+                    : error.message;
+
+                errorDiv.textContent = displayMessage;
                 errorDiv.classList.remove('hidden');
                 container.innerHTML = '';
             } finally {
