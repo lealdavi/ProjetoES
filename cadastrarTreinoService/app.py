@@ -210,7 +210,7 @@ def add_treino_dia(treino_personalizado):
     conexao.close()
 
     return (
-        f"O treino {dia_escolhido} foi salvo com sucesso! <br>"
+        f"O treino {tipo_escolhido} foi salvo com sucesso! <br>"
         f"<a href='/cadastrar'>Inserir mais um treino diário</a> <br>"
         # novamente, estou repassando o id_aluno para simplificar outros servicos 
         f"<a href='/finalizar?id_aluno={id_aluno}'>Finalizar cadastro</a>"
