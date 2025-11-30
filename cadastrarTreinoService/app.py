@@ -1,10 +1,14 @@
+import json
+import requests
 import psycopg2
 import psycopg2.extras
-import requests
 from item_treino import ItemTreino
 from treino_diario import TreinoDiario
 from treino_personalizado import TreinoPersonalizado
 from flask import Flask, request, render_template
+
+EMAIL_SERVICE_URL = 'http://127.0.0.1:5000' 
+EMAIL_ENDPOINT = f'{EMAIL_SERVICE_URL}/api/notificarEmailService'
 
 app = Flask(__name__)
 
@@ -184,6 +188,19 @@ def add_item_treino(item, id_treino_dia):
 
     cursor.close()
     conexao.close()
+
+
+def notificar(nome_professor, email_usuario):
+    payload = {
+        "email": email_usuario,
+        "nome_professor": nome_professor
+    }
+    
+    response = requests.post(
+        EMAIL_ENDPOINT,
+        json=payload,
+        headers={'Content-Type': 'application/json'}
+    )
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
