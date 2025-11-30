@@ -63,6 +63,16 @@ def finalizar():
 
     email_tupla = cursor.fetchone()
 
+    if not email_tupla:
+        return f"Erro: Não foi possível encontrar o e-mail do aluno com ID {id_aluno}.", 404
+        
+    conexao.close()
+    cursor.close()
+     
+    email_aluno = email_tupla[0]
+    nome_professor = "Ronnie Coleman"
+    
+    notificar(nome_professor, email_aluno)
     return f"Treino semanal personalizado cadastrado com sucesso! <br> <a href='/'>Voltar para painel do treinador</a>"
 
 @app.route("/ver_avaliacao_fisica", methods=["POST"])
