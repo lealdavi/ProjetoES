@@ -5,21 +5,23 @@
     <title>Cadastrar Treino</title>
 </head>
 <body>
-    <h1>Cadastrar exercício para o aluno</h1>
+    <h1>Cadastrar Treino Diário</h1>
+
+    <p><strong>ALUNO: {{ nome_aluno }}</strong> </p>
 
     <form action="/add_treino" method="POST" onsubmit="if(document.querySelectorAll('input[name=exercicios_selecionados]:checked').length == 0) { alert('ERRO: Você precisa selecionar pelo menos um exercício!'); return false; }">
 
         <input type="hidden" name="id_aluno" value="{{ id_aluno }}">
 
-        <p>Selecione o tipo:</p>
+        <p>Selecione o tipo de treino:</p>
 
-        <label><input type="radio" name="dia_treino" value="A" required> A</label>
-        <label><input type="radio" name="dia_treino" value="B" required> B</label>
-        <label><input type="radio" name="dia_treino" value="C" required> C</label>
-        <label><input type="radio" name="dia_treino" value="D" required> D</label>
-        <label><input type="radio" name="dia_treino" value="E" required> E</label>
-        <label><input type="radio" name="dia_treino" value="F" required> F</label>
-        <label><input type="radio" name="dia_treino" value="G" required> G</label>
+        <label><input type="radio" name="tipo_treino" value="A" required> A</label>
+        <label><input type="radio" name="tipo_treino" value="B" required> B</label>
+        <label><input type="radio" name="tipo_treino" value="C" required> C</label>
+        <label><input type="radio" name="tipo_treino" value="D" required> D</label>
+        <label><input type="radio" name="tipo_treino" value="E" required> E</label>
+        <label><input type="radio" name="tipo_treino" value="F" required> F</label>
+        <label><input type="radio" name="tipo_treino" value="G" required> G</label>
 
         <hr>
         <p>Lista de Exercícios:</p>
@@ -33,19 +35,19 @@
             <br>
 
             <label>Séries:</label>
-            <input type="number" name="series_{{ exercicio['id_exercicio'] }}" min="0">
+            <input type="number" name="series_{{ exercicio['id_exercicio'] }}" min="1">
 
             <label>Repetições:</label>
-            <input type="number" name="repeticoes_{{ exercicio['id_exercicio'] }}" min="0">
+            <input type="number" name="repeticoes_{{ exercicio['id_exercicio'] }}" min="1">
 
             <label>Intervalo (s):</label>
-            <input type="number" name="intervalo_{{ exercicio['id_exercicio'] }}" min="0">
+            <input type="number" name="intervalo_{{ exercicio['id_exercicio'] }}" min="1">
 
             <br><br>
 
         {% endfor %}
 
-        <input type="submit" value="Salvar Treino">
+        <input type="submit" value="Salvar Treino Diário">
     </form>
 </body>
 </html>
