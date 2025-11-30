@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Avaliação Física (Flask)</title>
+    <style>
+        body{font-family:sans-serif;max-width:600px;margin:20px auto; padding: 20px;}
+        fieldset{margin-bottom: 15px; border: 1px solid #ccc; padding: 10px;}
+        label{display:inline-block; margin-bottom: 5px;}
+        input[type="text"], input[type="number"] {width: 100%; box-sizing: border-box; padding: 5px;}
+        .result {margin-top:20px; padding:10px; border:1px solid #ccc; display:none;}
+        .success {background-color: #e8f5e9; border-color: #4caf50;}
+        .error {background-color: #ffebee; border-color: #f44336;}
+    </style>
+</head>
+<body>
+    <h2>Avaliação Física (Flask + SQL)</h2>
+
+    <form id="avalForm">
+        <label>ID Usuário:</label>
+        <input type="number" id="id_usuario" value="1" required><br><br>
+
+        <fieldset>
+            <legend>Biometria</legend>
+            <label>Idade:</label> <input type="number" id="idade" required>
+            <label>Peso (kg):</label> <input type="number" id="peso" step="0.1" required>
+            <label>Altura (m):</label> <input type="number" id="altura" step="0.01" required>
+        </fieldset>
+
+        <fieldset>
+            <legend>Histórico de Doenças</legend>
+            <input type="checkbox" name="doenca" value="DIABETES"> Diabetes<br>
+            <input type="checkbox" name="doenca" value="HIPERTENSAO"> Hipertensão<br>
+            <input type="checkbox" name="doenca" value="HERNIA"> Hérnia<br>
+            <label style="margin-top:10px;">Outra (Qual?):</label>
+            <input type="text" id="outra_doenca">
+        </fieldset>
+
+        <fieldset>
+            <legend>Limitações Físicas</legend>
+            <input type="text" id="limitacoes" placeholder="Ex: Dor no joelho...">
+        </fieldset>
+
+        <fieldset>
+            <legend>Treino</legend>
+            <label>Nível:</label>
+            <select id="nivel" style="width:100%">
+                <option value="INICIANTE">Iniciante</option>
+                <option value="INTERMEDIARIO">Intermediário</option>
+                <option value="AVANCADO">Avançado</option>
+            </select>
+            <br><br>
+            <label>Frequência (dias/semana):</label>
+            <input type="number" id="frequencia" min="1" max="7">
+        </fieldset>
+
+        <button type="button" onclick="enviarDados()" style="width:100%; padding:10px; background:#4CAF50; color:white; border:none; cursor:pointer;">SALVAR AVALIAÇÃO</button>
+    </form>
+
+    <div id="res" class="result"></div>
+
+    <script>
+        async function enviarDados() {
+            const doencasChecks = [];
+            document.querySelectorAll('input[name="doenca"]:checked').forEach(el => doencasChecks.push(el.value));
+
+            const payload = {
+                id_usuario: parseInt(document.getElementById("id_usuario").value),
+                idade: parseInt(document.getElementById("idade").value),
+                peso: parseFloat(document.getElementById("peso").value),
+                altura: parseFloat(document.getElementById("altura").value),
+                
+                // Nomes compatíveis com o app.py
+                doencas_selecionadas: doencasChecks,
+                outra_doenca: document.getElementById("outra_doenca").value,
+                limitacoes: document.getElementById("limitacoes").value,
+                
+                nivel: document.getElementById("nivel").value,
+                frequencia: parseInt(document.getElementById("frequencia").value)
+            };
+
+            const divRes = document.getElementById("res");
+            
+            try {
+                // Flask roda na porta 8000 conforme configurado no app.run
+                const req = await fetch("http://127.0.0.1:8000/avaliacao", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await req.json();
+                
+                divRes.style.display = "block";
+                divRes.className = "result"; // Reset classes
+
+                if(req.ok) {
+                    divRes.classList.add("success");
+                    divRes.innerHTML = `
+                        <strong>Sucesso!</strong><br>
+                        ID Gerado: ${data.id_avaliacao}<br>
+                        IMC: ${data.imc_calculado}<br>
+                        Data: ${data.data_cadastro}
+                    `;
+                } else {
+                    divRes.classList.add("error");
+                    divRes.innerHTML = `Erro: ${data.error || "Erro desconhecido"}`;
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Erro de conexão. Verifique se o app.py está rodando.");
+            }
+        }
+    </script>
+</body>
+</html>
