@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treino Personalizado</title>
+    <!-- Carrega Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f9;
+        }
+        /* Estilos específicos para a UX de treino */
+        .day-header {
+            border-bottom: 3px solid;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-2xl p-6 md:p-10">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-4">Seu Plano de Treino</h1>
+
+        <!-- Container principal de visualização -->
+        <div id="loading" class="text-center py-8 text-lg font-medium text-blue-600">
+            Carregando seu treino...
+        </div>
+        <div id="treino-container" class="space-y-8">
+            <!-- Conteúdo dinâmico será injetado aqui -->
+        </div>
+
+        <div id="error-message" class="hidden mt-8 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            Não foi possível carregar o treino. Verifique se o servidor Flask e o banco de dados estão ativos.
+        </div>
+        
+    </div>
+
+    <script>
+        const API_ENDPOINT = '/usuarios/1/musculos';
+        const container = document.getElementById('treino-container');
+        const loading = document.getElementById('loading');
+        const errorDiv = document.getElementById('error-message');
+
+        /**
+         * Agrupa os dados brutos por dia de treino (sigla)
+         * @param {Array} muscles - Lista de objetos {musculo: string, sigla: string}
+         * @returns {Object} - Ex: {A: ['Peito', 'Tríceps'], B: ['Perna', 'Ombro']}
+         */
+        function groupMusclesByDay(muscles) {
+            const grouped = {};
+            muscles.forEach(item => {
+                const sigla = item.sigla;
+                const musculo = item.musculo;
+                
+                if (!grouped[sigla]) {
+                    grouped[sigla] = new Set(); // Usa Set para garantir músculos únicos
+                }
+                grouped[sigla].add(musculo);
+            });
+
+            // Converte Sets para Array e ordena as siglas (A, B, C...)
+            const sortedGrouped = {};
+            Object.keys(grouped).sort().forEach(key => {
+                sortedGrouped[key] = Array.from(grouped[key]).sort(); // Ordena a lista de músculos
+            });
+
+            return sortedGrouped;
+        }
+
+        /**
+         * Cria o elemento HTML para um dia de treino agrupado.
+         * @param {string} sigla - A letra do dia (A, B, C)
+         * @param {Array} musculos - Lista de grupos musculares
+         */
+        function createDayCard(sigla, musculos) {
+            const isDayA = sigla === 'A';
+            const colorClass = isDayA ? 'border-indigo-500 text-indigo-700 bg-indigo-50' : 'border-green-500 text-green-700 bg-green-50';
+            const siglaTitle = `TREINO ${sigla}`;
+
+            const card = document.createElement('div');
+            card.className = `p-6 rounded-xl shadow-lg transition duration-300 hover:shadow-xl ${colorClass}`;
+            
+            // Título do Dia
+            const header = document.createElement('h2');
+            header.className = `day-header text-2xl font-extrabold pb-2 mb-4 border-b-2 border-dashed ${isDayA ? 'border-indigo-400' : 'border-green-400'}`;
+            header.textContent = siglaTitle;
+            card.appendChild(header);
+
+            // Lista de Músculos
+            const ul = document.createElement('ul');
+            ul.className = 'list-none space-y-2';
+
+            if (musculos.length === 0) {
+                 const li = document.createElement('li');
+                 li.className = 'text-gray-500 italic';
+                 li.textContent = 'Nenhum grupo muscular cadastrado para este dia.';
+                 ul.appendChild(li);
+            } else {
+                 musculos.forEach(musculo => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center text-gray-800 text-lg';
+                    li.innerHTML = `
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0 ${isDayA ? 'text-indigo-600' : 'text-green-600'}" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        ${musculo}
+                    `;
+                    ul.appendChild(li);
+                });
+            }
+            
+            card.appendChild(ul);
+            return card;
+        }
+
+        /**
+         * Função principal para buscar e exibir os dados.
+         */
+        async function fetchTreino() {
+            loading.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+            container.innerHTML = ''; // Limpa o container
+            
+            try {
+                const response = await fetch(API_ENDPOINT);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const muscles = data.treino_resumo;
+
+                if (!muscles || muscles.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">Nenhum treino diário encontrado.</p>';
+                    return;
+                }
+
+                // 1. Agrupa os músculos por dia (sigla) e ordena as siglas
+                const groupedMuscles = groupMusclesByDay(muscles);
+                
+                // 2. Renderiza os cartões na ordem A, B, C...
+                Object.entries(groupedMuscles).forEach(([sigla, musculos]) => {
+                    const card = createDayCard(sigla, musculos);
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
+                errorDiv.classList.remove('hidden');
+                container.innerHTML = '';
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        // Inicia o carregamento dos dados
+        window.onload = fetchTreino;
+    </script>
+</body>
+</html>

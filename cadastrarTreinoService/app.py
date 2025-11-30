@@ -24,7 +24,7 @@ def get_db_connection():
 
 @app.route("/")
 def home():
-    return render_template("HomeTreinador.html")
+    return render_template("homeTreinador.html")
 
 
 @app.route("/cadastrar")
@@ -63,21 +63,10 @@ def finalizar():
 
     email_tupla = cursor.fetchone()
 
-    if not email_tupla:
-        return f"Erro: Não foi possível encontrar o e-mail do aluno com ID {id_aluno}.", 404
-        
-    conexao.close()
-    cursor.close()
-     
-    email_aluno = email_tupla[0]
-    nome_professor = "Ronnie Coleman"
-    
-    notificar(nome_professor, email_aluno)
-    return "Treino semanal personalizado cadastrado com sucesso!"
+    return f"Treino semanal personalizado cadastrado com sucesso! <br> <a href='/'>Voltar para painel do treinador</a>"
 
-
-@app.route("/ver_avaliacao_medica", methods=["POST"])
-def mostrar_avaliacao_medica():
+@app.route("/ver_avaliacao_fisica", methods=["POST"])
+def mostrar_avaliacao_fisica():
     id_aluno = request.form.get("usuario_selecionado")
 
     conexao = get_db_connection()
@@ -108,6 +97,17 @@ def lista_exercicios():
     url_api = "http://127.0.0.1:8000"
     lista_de_exercicios = []
 
+    conexao = get_db_connection()
+    cursor = conexao.cursor()
+
+    cursor.execute("SELECT nome FROM usuario WHERE id_usuario = %s", (id_aluno,))
+    resultado_nome = cursor.fetchone()
+
+    nome_aluno = resultado_nome[0]
+
+    cursor.close()
+    conexao.close()
+
     try:
         resposta = requests.get(url_api)
         if resposta.status_code == 200:
@@ -115,7 +115,7 @@ def lista_exercicios():
     except Exception as e:
         print(e)
 
-    return render_template("cadastrarTreinoAluno.html", resultado=lista_de_exercicios, id_aluno=id_aluno)
+    return render_template("cadastrarTreinoAluno.html", resultado=lista_de_exercicios, id_aluno=id_aluno, nome_aluno=nome_aluno)
 
 
 @app.route("/add_treino", methods=["POST"])
@@ -152,11 +152,19 @@ def add_treino():
 
 
 def add_treino_dia(treino_personalizado):
-    dia_escolhido = request.form.get("dia_treino")
+    tipo_escolhido = request.form.get("tipo_treino")
     exercicios_escolhidos = request.form.getlist("exercicios_selecionados")
     id_aluno = request.form.get("id_aluno")
 
-    treino_do_dia = TreinoDiario(dia_escolhido)
+    for id_exercicio in exercicios_escolhidos:
+        series = request.form.get(f"series_{id_exercicio}")
+        repeticoes = request.form.get(f"repeticoes_{id_exercicio}")
+        intervalo = request.form.get(f"intervalo_{id_exercicio}")
+
+        if not series or not repeticoes or not intervalo:
+            return f"Treino não salvo! Preencha os campos séries, repetições e intervalo. <br> <a href='/cadastrar'>Voltar para cadastro de treino diário</a>"
+
+    treino_do_dia = TreinoDiario(tipo_escolhido)
 
     conexao = get_db_connection()
     cursor = conexao.cursor()
@@ -171,20 +179,8 @@ def add_treino_dia(treino_personalizado):
     cursor.execute(comando)
     id_treino_dia = cursor.fetchone()[0]
 
-    if dia_escolhido == "A":
-        comando_update = "UPDATE treino SET treino_a = %s WHERE id_treino = %s"
-    elif dia_escolhido == "B":
-        comando_update = "UPDATE treino SET treino_b = %s WHERE id_treino = %s"
-    elif dia_escolhido == "C":
-        comando_update = "UPDATE treino SET treino_c = %s WHERE id_treino = %s"
-    elif dia_escolhido == "D":
-        comando_update = "UPDATE treino SET treino_d = %s WHERE id_treino = %s"
-    elif dia_escolhido == "E":
-        comando_update = "UPDATE treino SET treino_e = %s WHERE id_treino = %s"
-    elif dia_escolhido == "F":
-        comando_update = "UPDATE treino SET treino_f = %s WHERE id_treino = %s"
-    else:
-        comando_update = "UPDATE treino SET treino_g = %s WHERE id_treino = %s"
+    coluna = f"treino_{tipo_escolhido.lower()}" 
+    comando_update = f"UPDATE treino SET {coluna} = %s WHERE id_treino = %s"
 
     cursor.execute(comando_update, (id_treino_dia, treino_personalizado.id_treino))
     conexao.commit()
