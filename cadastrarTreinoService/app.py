@@ -103,7 +103,7 @@ def mostrar_avaliacao_fisica():
 
 @app.route("/lista_exercicios", methods=["GET", "POST"])
 def lista_exercicios():
-    id_aluno = request.form.get("usuario_selecionado")
+    id_aluno = request.form.get("usuario_selecionado") or request.args.get("id_aluno")
     url_api = "http://127.0.0.1:8000"
     lista_de_exercicios = []
 
@@ -211,8 +211,8 @@ def add_treino_dia(treino_personalizado):
 
     return (
         f"O treino {tipo_escolhido} foi salvo com sucesso! <br>"
-        f"<a href='/cadastrar'>Inserir mais um treino diário</a> <br>"
-        # novamente, estou repassando o id_aluno para simplificar outros servicos 
+        f"<a href='/lista_exercicios?id_aluno={id_aluno}'>Inserir mais um treino diário</a> <br>"
+        # novamente, estou repassando o id_aluno para simplificar outros servicos
         f"<a href='/finalizar?id_aluno={id_aluno}'>Finalizar cadastro</a>"
     )
 
