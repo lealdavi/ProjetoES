@@ -166,6 +166,12 @@ def add_treino_dia(treino_personalizado):
     exercicios_escolhidos = request.form.getlist("exercicios_selecionados")
     id_aluno = request.form.get("id_aluno")
 
+    if not tipo_escolhido:
+        return f"Erro: Selecione o tipo do treino antes de salvar. <br> <a href='/lista_exercicios?id_aluno={id_aluno}'>Voltar</a>"
+
+    if not exercicios_escolhidos:
+        return f"ERRO: Você precisa selecionar pelo menos um exercício! <br> <a href='/lista_exercicios?id_aluno={id_aluno}'>Voltar</a>"
+
     for id_exercicio in exercicios_escolhidos:
         series = request.form.get(f"series_{id_exercicio}")
         repeticoes = request.form.get(f"repeticoes_{id_exercicio}")
@@ -173,6 +179,17 @@ def add_treino_dia(treino_personalizado):
 
         if not series or not repeticoes or not intervalo:
             return f"Treino não salvo! Preencha os campos séries, repetições e intervalo. <br> <a href='/cadastrar'>Voltar para cadastro de treino diário</a>"
+
+    try:
+        s = int(series)
+        r = int(repeticoes)
+        i = int(intervalo)
+
+        if s <= 0 or r <= 0 or i <= 0:
+            return f"Erro: Valores devem ser maiores que zero. <br> <a href='/lista_exercicios?id_aluno={id_aluno}'>Voltar</a>"
+
+    except ValueError:
+        return f"Erro: Os campos devem conter apenas números. <br> <a href='/lista_exercicios?id_aluno={id_aluno}'>Voltar</a>"
 
     treino_do_dia = TreinoDiario(tipo_escolhido)
 
