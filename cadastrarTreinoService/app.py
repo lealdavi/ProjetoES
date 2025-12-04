@@ -24,17 +24,17 @@ def get_db_connection():
 
 
 def notificar_email_assincrono(payload: Dict[str, Any]):
-    print(f"\n[Publisher] -> Iniciando notificação assíncrona para {NOTIFICATION_SERVICE_URL}")
+    print(f"\n[Cliente Facade] -> Iniciando chamada assíncrona para {NOTIFICATION_SERVICE_URL}")
     try:
         response = requests.post(NOTIFICATION_SERVICE_URL, json=payload, timeout=5)
         
         if response.status_code == 200:
-            print("[Publisher] SUCESSO: Requisição de notificação enviada.")
+            print("[Cliente Facade] SUCESSO: Requisição de notificação enviada.")
         else:
-            print(f"[Publisher] ERRO ({response.status_code}): Falha ao notificar o serviço de e-mail.")
+            print(f"[Cliente Facade] ERRO ({response.status_code}): Falha ao notificar o Facade de e-mail. Status: {response.status_code}")
 
     except requests.exceptions.RequestException as e:
-        print(f"[Publisher] ERRO DE CONEXÃO: Não foi possível conectar ao Serviço de E-mail. Certifique-se que o serviço está rodando na porta 5001. {e}")
+        print(f"[Cliente Facade] ERRO DE CONEXÃO: Não foi possível conectar ao Serviço de E-mail (Facade). Certifique-se que o serviço está rodando na porta 5001. Erro: {e}")
 
 
 @app.route("/")
@@ -276,18 +276,6 @@ def add_item_treino(item, id_treino_dia):
     cursor.close()
     conexao.close()
 
-
-def notificar(nome_professor, email_usuario):
-    payload = {
-        "email": email_usuario,
-        "nome_professor": nome_professor
-    }
-    
-    requests.post(
-        EMAIL_ENDPOINT,
-        json=payload,
-        headers={'Content-Type': 'application/json'}
-    )
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
