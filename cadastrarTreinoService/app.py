@@ -1,14 +1,15 @@
 import json
 import requests
 import psycopg2
+import threading
 import psycopg2.extras
 from item_treino import ItemTreino
 from treino_diario import TreinoDiario
 from treino_personalizado import TreinoPersonalizado
-from flask import Flask, request, render_template
+from flask import Flask, render_template, request
+from typing import Dict, Any
 
-EMAIL_SERVICE_URL = 'http://127.0.0.1:5001' 
-EMAIL_ENDPOINT = f'{EMAIL_SERVICE_URL}/api/notificarEmailService'
+NOTIFICATION_SERVICE_URL = "http://127.0.0.1:5001/notify_treino"
 
 app = Flask(__name__)
 
@@ -22,9 +23,23 @@ def get_db_connection():
     )
 
 
+def notificar_email_assincrono(payload: Dict[str, Any]):
+    print(f"\n[Publisher] -> Iniciando notificação assíncrona para {NOTIFICATION_SERVICE_URL}")
+    try:
+        response = requests.post(NOTIFICATION_SERVICE_URL, json=payload, timeout=5)
+        
+        if response.status_code == 200:
+            print("[Publisher] SUCESSO: Requisição de notificação enviada.")
+        else:
+            print(f"[Publisher] ERRO ({response.status_code}): Falha ao notificar o serviço de e-mail.")
+
+    except requests.exceptions.RequestException as e:
+        print(f"[Publisher] ERRO DE CONEXÃO: Não foi possível conectar ao Serviço de E-mail. Certifique-se que o serviço está rodando na porta 5001. {e}")
+
+
 @app.route("/")
 def home():
-    return render_template("homeTreinador.html")
+    return render_template("HomeTreinador.html")
 
 
 @app.route("/cadastrar")
@@ -41,9 +56,9 @@ def cadastrar():
 
     return render_template("usuarios.html", resultado=resultado)
 
+
 @app.route("/finalizar")
 def finalizar():
-    #chamar função de enviar email
     id_aluno = request.args.get("id_aluno")
     
     if not id_aluno:
@@ -63,18 +78,32 @@ def finalizar():
 
     email_tupla = cursor.fetchone()
 
+    cursor.execute(comando, valores)
+
+    email_tupla = cursor.fetchone()
+
     if not email_tupla:
+        conexao.close()
+        cursor.close()
         return f"Erro: Não foi possível encontrar o e-mail do aluno com ID {id_aluno}.", 404
         
+    email_aluno = email_tupla[0]
+    nome_professor = "Osmar Telo"
+    
     conexao.close()
     cursor.close()
      
-    email_aluno = email_tupla[0]
-    nome_professor = "Ronnie Coleman"
+    payload = {
+        "email": email_aluno,
+        "nome_professor": nome_professor
+    }
     
-    notificar(nome_professor, email_aluno)
+    thread = threading.Thread(target=notificar_email_assincrono, args=(payload,))
+    thread.start()
+    
     return f"Treino semanal personalizado cadastrado com sucesso! <br> <a href='/'>Voltar para painel do treinador</a>"
-
+    
+    
 @app.route("/ver_avaliacao_fisica", methods=["POST"])
 def mostrar_avaliacao_fisica():
     id_aluno = request.form.get("usuario_selecionado")
@@ -103,7 +132,7 @@ def mostrar_avaliacao_fisica():
 
 @app.route("/lista_exercicios", methods=["GET", "POST"])
 def lista_exercicios():
-    id_aluno = request.form.get("usuario_selecionado")
+    id_aluno = request.form.get("usuario_selecionado") or request.args.get("id_aluno")
     url_api = "http://127.0.0.1:8000"
     lista_de_exercicios = []
 
@@ -166,6 +195,12 @@ def add_treino_dia(treino_personalizado):
     exercicios_escolhidos = request.form.getlist("exercicios_selecionados")
     id_aluno = request.form.get("id_aluno")
 
+    if not tipo_escolhido:
+        return f"Erro: Selecione o tipo do treino antes de salvar. <br> <a href='/lista_exercicios?id_aluno={id_aluno}'>Voltar</a>"
+
+    if not exercicios_escolhidos:
+        return f"ERRO: Você precisa selecionar pelo menos um exercício! <br> <a href='/lista_exercicios?id_aluno={id_aluno}'>Voltar</a>"
+
     for id_exercicio in exercicios_escolhidos:
         series = request.form.get(f"series_{id_exercicio}")
         repeticoes = request.form.get(f"repeticoes_{id_exercicio}")
@@ -173,6 +208,17 @@ def add_treino_dia(treino_personalizado):
 
         if not series or not repeticoes or not intervalo:
             return f"Treino não salvo! Preencha os campos séries, repetições e intervalo. <br> <a href='/cadastrar'>Voltar para cadastro de treino diário</a>"
+
+    try:
+        s = int(series)
+        r = int(repeticoes)
+        i = int(intervalo)
+
+        if s <= 0 or r <= 0 or i <= 0:
+            return f"Erro: Valores devem ser maiores que zero. <br> <a href='/lista_exercicios?id_aluno={id_aluno}'>Voltar</a>"
+
+    except ValueError:
+        return f"Erro: Os campos devem conter apenas números. <br> <a href='/lista_exercicios?id_aluno={id_aluno}'>Voltar</a>"
 
     treino_do_dia = TreinoDiario(tipo_escolhido)
 
@@ -210,9 +256,9 @@ def add_treino_dia(treino_personalizado):
     conexao.close()
 
     return (
-        f"O treino {dia_escolhido} foi salvo com sucesso! <br>"
-        f"<a href='/cadastrar'>Inserir mais um treino diário</a> <br>"
-        # novamente, estou repassando o id_aluno para simplificar outros servicos 
+        f"O treino {tipo_escolhido} foi salvo com sucesso! <br>"
+        f"<a href='/lista_exercicios?id_aluno={id_aluno}'>Inserir mais um treino diário</a> <br>"
+        # novamente, estou repassando o id_aluno para simplificar outros servicos
         f"<a href='/finalizar?id_aluno={id_aluno}'>Finalizar cadastro</a>"
     )
 
