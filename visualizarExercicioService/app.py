@@ -1,64 +1,46 @@
+from flask import Flask, render_template
+from flask_cors import CORS
 import psycopg2
-from flask import Flask, render_template, request
 
 app = Flask(__name__)
+CORS(app)
 
 def get_db_connection():
     try:
-        connection = psycopg2.connect(
-            dbname = "neondb",
-            user = "neondb_owner",
-            password = "npg_TJUVcrGkw29h",
-            host = "ep-flat-night-acgvvklr-pooler.sa-east-1.aws.neon.tech",
-            sslmode = "require",
+        return psycopg2.connect(
+            dbname="neondb", user="neondb_owner", password="npg_TJUVcrGkw29h",
+            host="ep-flat-night-acgvvklr-pooler.sa-east-1.aws.neon.tech", sslmode="require"
         )
-        return connection
-    except psycopg2.Error as e:
-        print(f"Erro ao conectar: {e}")
-        return None
+    except: return None
 
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-@app.route("/detalhe_exercicio", methods=["GET"])
-def detalhe_exercicio():
-    id_exercicio = request.args.get("id")
-
-    if not id_exercicio:
-       return "<h1>Erro: ID do exercicio é obrigatório.</h1>"
-
+@app.route('/usuario/treino/listar/detalhamento/<int:id_exercicio>')
+def detalhar(id_exercicio):
     conn = get_db_connection()
-    if not conn: return "Erro na conexão com banco de dados", 500
-
-    cursor = conn.cursor()
     exercicio = None
-
-    try:
-        sql = """
-            SELECT nome, musculos_trabalhados, video_execucao, imagem_musculos FROM exercicio WHERE id_exercicio = %s
-        """
-        cursor.execute(sql, (id_exercicio,))
-        resultado = cursor.fetchone()
-
-        if resultado:
-            exercicio = {
-                    "nome": resultado[0],
-                    "musculos": resultado[1],
-                    "video": resultado[2],
-                    "imagem": resultado[3]
-            }
-
-    except Exception as e:
-        print(f"Erro SQL: {e}")
-    finally:
-        cursor.close()
-        conn.close()
+    
+    if conn:
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT nome, musculos_trabalhados, video_execucao, imagem_musculos FROM exercicio WHERE id_exercicio = %s"
+                cur.execute(sql, (id_exercicio,))
+                row = cur.fetchone()
+                if row:
+                    exercicio = {
+                        "nome": row[0],
+                        "musculos": row[1].split(',') if row[1] else [],
+                        "video": row[2],
+                        "imagem": row[3]
+                    }
+        except Exception as e:
+            return f"<div class='text-red-500'>Erro SQL: {e}</div>", 500
+        finally:
+            conn.close()
 
     if not exercicio:
-        return "<h1>Exercício não encontrado</h1>", 404
+        return "<div class='p-6 text-center text-gray-500'>Exercício não encontrado no sistema.</div>"
 
-    return render_template("detalhamento.html", ex=exercicio)
+    return render_template('detalhamento.html', ex=exercicio)
 
-if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+if __name__ == '__main__':
+    # Roda na porta 5003
+    app.run(debug=True, port=5003)

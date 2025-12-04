@@ -1,0 +1,35 @@
+<div class="p-6">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Treino {{ letra }} - Exercícios</h2>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-sm text-gray-500 border-b">
+                    <th class="py-2">Exercício</th>
+                    <th class="py-2 text-center">Séries</th>
+                    <th class="py-2 text-center">Reps</th>
+                    <th class="py-2 text-right">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if itens|length == 0 %}
+                <tr><td colspan="4" class="py-4 text-center text-gray-400">Nenhum exercício encontrado.</td></tr>
+                {% endif %}
+
+                {% for item in itens %}
+                <tr class="border-b hover:bg-gray-50 transition group">
+                    <td class="py-3 font-medium text-gray-800">{{ item.nome }}</td>
+                    <td class="py-3 text-center text-gray-600">{{ item.series }}</td>
+                    <td class="py-3 text-center text-gray-600">{{ item.reps }}</td>
+                    <td class="py-3 text-right">
+                        <button onclick="carregarDetalhe({{ item.id }})" 
+                                class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-100 transition shadow-sm border border-blue-200">
+                            Detalhes
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

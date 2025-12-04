@@ -1,137 +1,38 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ ex.nome }} - Detalhes</title>
-    <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f9f9f9; 
-            margin: 0; 
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .container {
-            background: white;
-            max-width: 900px;
-            width: 100%;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .header {
-            background: #2c3e50;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .grid-visual {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* Divide: Vídeo | Diagrama */
-            gap: 20px;
-            padding: 20px;
-        }
-        
-        /* Estilo do Vídeo */
-        .video-wrapper {
-            position: relative;
-            padding-bottom: 56.25%; /* Aspect Ratio 16:9 */
-            height: 0;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+<div class="p-0 md:p-6 bg-white rounded-lg">
+    <div class="flex justify-between items-start mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">{{ ex.nome }}</h2>
+    </div>
 
-        /* Estilo do Diagrama de Músculos */
-        .diagrama-wrapper {
-            background-color: #f0f2f5;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            border: 2px dashed #cbd5e0;
-        }
-        .muscle-tag {
-            background-color: #e74c3c;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            margin: 5px;
-            font-weight: bold;
-            display: inline-block;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .human-body-placeholder {
-            height: 200px;
-            width: 150px;
-            background-color: #ddd;
-            border-radius: 50px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #777;
-        }
-
-        @media (max-width: 768px) {
-            .grid-visual { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="header">
-            <h1 style="margin:0;">{{ ex.nome }}</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-black rounded-lg overflow-hidden relative shadow-lg" style="padding-top: 56.25%;">
+            {% if ex.video %}
+            <iframe class="absolute top-0 left-0 w-full h-full" src="{{ ex.video }}" frameborder="0" allowfullscreen></iframe>
+            {% else %}
+            <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center text-gray-500">
+                Sem vídeo disponível
+            </div>
+            {% endif %}
         </div>
 
-        <div class="grid-visual">
-            <div>
-                <h3 style="margin-top:0;">🎥 Execução</h3>
-                {% if ex.video %}
-                    <div class="video-wrapper">
-                        <iframe src="{{ ex.video }}" title="Vídeo do exercício" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"allowfullscreen></iframe>
-                    </div>
+        <div class="flex flex-col space-y-4">
+            <div class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg p-4 flex items-center justify-center min-h-[200px]">
+                {% if ex.imagem %}
+                <img src="{{ ex.imagem }}" class="max-h-48 max-w-full rounded object-contain" alt="Anatomia">
                 {% else %}
-                    <div class="video-wrapper" style="display:flex; align-items:center; justify-content:center; color:white;">
-                        Sem vídeo disponível
-                    </div>
+                <span class="text-gray-400 text-sm italic">Sem imagem anatômica</span>
                 {% endif %}
-                
             </div>
 
             <div>
-                <h3 style="margin-top:0;">💪 Músculos Trabalhados</h3>
-                <div class="diagrama-wrapper">
-                    {% if ex.imagem %}
-                        <img src="{{ ex.imagem }}" alt="Músculos trabalhados no {{ ex.nome }}" style="max-width: 100%; height: auto; border-radius: 8px;">
-                    {% else %}
-                        <div class="human-body-placeholder">
-                        [sem imagem]
-                        </div>
-                    {% endif %}
-                    
-                    <div style="text-align: center; margin-top: 10px;">
-                        <p>Foco Anatômico:</p>
-                        {% for musculo in ex.musculos.split(',') %}
-                            <span class="muscle-tag">{{ musculo.strip() }}</span>
-                        {% endfor %}
-                    </div>
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Músculos Alvo</h4>
+                <div class="flex flex-wrap gap-2">
+                    {% for m in ex.musculos %}
+                    <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                        {{ m.strip() }}
+                    </span>
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-
-</body>
-</html>
+</div>

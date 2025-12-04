@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treino Micro-Frontends</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; }</style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white p-6 rounded-2xl shadow-sm mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Portal de Treino</h1>
+                <p class="text-sm text-gray-500">Treinos da semana</p>
+            </div>
+            <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg font-mono text-sm">
+                User: {{ usuario_id }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {% for sigla in menu %}
+            <div onclick="carregarLista('{{ sigla }}')" 
+                 class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md cursor-pointer border-l-4 border-blue-500 transition transform hover:-translate-y-1">
+                <h2 class="text-3xl font-bold text-gray-800">Treino {{ sigla }}</h2>
+                <p class="text-gray-400 mt-2 text-sm">Clique para ver exercícios</p>
+            </div>
+            {% else %}
+            <div class="col-span-3 text-center py-10 text-gray-500">
+                Nenhum treino encontrado.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="modal-container" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl relative">
+            <button onclick="fecharModal()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl font-bold z-10">&times;</button>
+            
+            <div id="modal-content" class="min-h-[200px] flex items-center justify-center">
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const URL_LISTA = "{{ url_lista }}";     
+        const URL_DETALHE = "{{ url_detalhe }}"; 
+        const USER_ID = "{{ usuario_id }}";
+
+        const modal = document.getElementById('modal-container');
+        const content = document.getElementById('modal-content');
+
+        async function carregarLista(sigla) {
+            abrirModal();
+            content.innerHTML = '<div class="text-blue-600 animate-pulse">Carregando lista do Serviço 2...</div>';
+            
+            try {
+                const response = await fetch(`${URL_LISTA}/usuario/treino/listar/${USER_ID}/${sigla}`);
+                if (!response.ok) throw new Error("Serviço de Lista indisponível");
+                
+                const html = await response.text();
+                content.innerHTML = html; 
+            } catch (error) {
+                content.innerHTML = `<div class="p-10 text-center text-red-500">
+                    <h3 class="font-bold text-lg">Erro de Comunicação</h3>
+                    <p>O Serviço de Lista (:5002) parece estar offline.</p>
+                </div>`;
+            }
+        }
+
+        
+        async function carregarDetalhe(idExercicio) {
+            
+            content.innerHTML = '<div class="text-purple-600 animate-pulse">Carregando detalhes do Serviço 3...</div>';
+            
+            try {
+                const response = await fetch(`${URL_DETALHE}/usuario/treino/listar/detalhamento/${idExercicio}`);
+                if (!response.ok) throw new Error("Serviço de Detalhe indisponível");
+                
+                const html = await response.text();
+                content.innerHTML = html;
+            } catch (error) {
+                content.innerHTML = `<div class="p-10 text-center text-red-500">Erro no Serviço de Detalhes (:5003).</div>`;
+            }
+        }
+
+        function abrirModal() { modal.classList.remove('hidden'); }
+        function fecharModal() { modal.classList.add('hidden'); }
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) fecharModal();
+        });
+    </script>
+</body>
+</html>
