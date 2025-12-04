@@ -33,6 +33,11 @@ def get_musculos_by_user_id(user_id):
     CASE
         WHEN it.id_treino_dia = t.treino_a THEN 'A'
         WHEN it.id_treino_dia = t.treino_b THEN 'B'
+        WHEN it.id_treino_dia = t.treino_c THEN 'C'
+        WHEN it.id_treino_dia = t.treino_d THEN 'D'
+        WHEN it.id_treino_dia = t.treino_e THEN 'E'
+        WHEN it.id_treino_dia = t.treino_f THEN 'F'
+        WHEN it.id_treino_dia = t.treino_g THEN 'G'
         ELSE '*'
     END AS sigla
     FROM
@@ -40,7 +45,8 @@ def get_musculos_by_user_id(user_id):
     INNER JOIN
         treino t ON u.id_usuario = t.id_usuario
     INNER JOIN
-        item_treino it ON it.id_treino_dia = t.treino_a OR it.id_treino_dia = t.treino_b 
+        item_treino it ON it.id_treino_dia = t.treino_a OR it.id_treino_dia = t.treino_b OR it.id_treino_dia = t.treino_c OR it.id_treino_dia = t.treino_d
+        OR it.id_treino_dia = t.treino_e OR it.id_treino_dia = t.treino_f OR it.id_treino_dia = t.treino_g 
     INNER JOIN
         exercicio e ON it.id_exercicio = e.id_exercicio
     WHERE
@@ -72,15 +78,15 @@ def get_musculos_by_user_id(user_id):
 def index():
     return render_template('index.html')
 
-@app.route('/usuarios/1/musculos', methods=['GET'])
-def listar_musculos_usuario_demo():
-    musculos_data = get_musculos_by_user_id(1)
+@app.route('/usuarios/<int:user_id>/musculos', methods=['GET'])
+def listar_musculos_usuario(user_id):    
+    musculos_data = get_musculos_by_user_id(user_id)
     
     if not musculos_data:
-        return jsonify({"message": "O usuário não possui treinos cadastrados."}), 404
+        return jsonify({"message": f"Nenhum treino disponível."}), 404
     
     return jsonify({
-        "usuario_id": 1,
+        "usuario_id": user_id,
         "treino_resumo": musculos_data
     })
 

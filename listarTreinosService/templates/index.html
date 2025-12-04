@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treino Personalizado</title>
+    <title>Listar Treino</title>
     <!-- Carrega Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -20,32 +20,65 @@
 <body class="p-4 sm:p-8">
 
     <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-2xl p-6 md:p-10">
-        <h1 class="text-3xl font-extrabold text-gray-900 mb-4">Seu Plano de Treino</h1>
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-6">Consulta de Plano de Treino</h1>
 
-        <!-- Container principal de visualização -->
-        <div id="loading" class="text-center py-8 text-lg font-medium text-blue-600">
-            Carregando seu treino...
+        <!-- Seção de Busca de Usuário -->
+        <div class="mb-8 p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-inner">
+            <label for="user-id-input" class="block text-sm font-medium text-gray-700 mb-2">
+                ID do aluno:
+            </label>
+            <div class="flex space-x-3">
+                <input 
+                    type="number" 
+                    id="user-id-input" 
+                    value="1" 
+                    placeholder="Ex: 5"
+                    class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 shadow-sm"
+                    min="1"
+                >
+                <button 
+                    id="fetch-button"
+                    class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+                >
+                    Buscar Treino
+                </button>
+            </div>
         </div>
-        <div id="treino-container" class="space-y-8">
-            <!-- Conteúdo dinâmico será injetado aqui -->
+        
+        <!-- Exibição do status de carregamento e erro -->
+        <div id="loading" class="hidden text-center py-8 text-lg font-medium text-blue-600">
+            <svg class="animate-spin h-5 w-5 mr-3 inline-block text-indigo-500" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Carregando treino para ID: <span id="current-user-id">...</span>
         </div>
 
         <div id="error-message" class="hidden mt-8 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
             Não foi possível carregar o treino.
         </div>
+
+        <!-- Container principal de visualização -->
+        <h2 id="treino-title" class="text-2xl font-bold text-gray-800 mt-8 mb-6 hidden">Treinos Atribuídos</h2>
+        <div id="treino-container" class="space-y-8">
+            <!-- Conteúdo dinâmico será injetado aqui -->
+        </div>
         
     </div>
 
     <script>
-        const API_ENDPOINT = '/usuarios/1/musculos';
+        // Elementos DOM
         const container = document.getElementById('treino-container');
         const loading = document.getElementById('loading');
         const errorDiv = document.getElementById('error-message');
+        const fetchButton = document.getElementById('fetch-button');
+        const userIdInput = document.getElementById('user-id-input');
+        const currentUserIdSpan = document.getElementById('current-user-id');
+        const treinoTitle = document.getElementById('treino-title');
 
         /**
          * Agrupa os dados brutos por dia de treino (sigla)
-         * @param {Array} muscles - Lista de objetos {musculo: string, sigla: string}
-         * @returns {Object} - Ex: {A: ['Peito', 'Tríceps'], B: ['Perna', 'Ombro']}
+         * ... (função groupMusclesByDay inalterada)
          */
         function groupMusclesByDay(muscles) {
             const grouped = {};
@@ -53,6 +86,9 @@
                 const sigla = item.sigla;
                 const musculo = item.musculo;
                 
+                // Ignora siglas que são '*' caso o ELSE da query seja atingido
+                if (sigla === '*') return; 
+
                 if (!grouped[sigla]) {
                     grouped[sigla] = new Set(); // Usa Set para garantir músculos únicos
                 }
@@ -70,8 +106,7 @@
 
         /**
          * Cria o elemento HTML para um dia de treino agrupado.
-         * @param {string} sigla - A letra do dia (A, B, C)
-         * @param {Array} musculos - Lista de grupos musculares
+         * ... (função createDayCard inalterada)
          */
         function createDayCard(sigla, musculos) {
             const isDayA = sigla === 'A';
@@ -118,9 +153,22 @@
          * Função principal para buscar e exibir os dados.
          */
         async function fetchTreino() {
+            const userId = userIdInput.value;
+            if (!userId) {
+                errorDiv.textContent = "Por favor, insira um ID de aluno válido.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            // A URL agora é dinâmica!
+            const API_ENDPOINT = `/usuarios/${userId}/musculos`;
+
             loading.classList.remove('hidden');
+            fetchButton.disabled = true;
             errorDiv.classList.add('hidden');
             container.innerHTML = ''; // Limpa o container
+            treinoTitle.classList.add('hidden');
+            currentUserIdSpan.textContent = userId;
             
             try {
                 const response = await fetch(API_ENDPOINT);
@@ -133,9 +181,13 @@
 
                 const data = await response.json();
                 const muscles = data.treino_resumo;
+                
+                treinoTitle.textContent = `Treinos do aluno ${data.usuario_id}: `;
+                treinoTitle.classList.remove('hidden');
+
 
                 if (!muscles || muscles.length === 0) {
-                    container.innerHTML = '<p class="text-gray-500">Nenhum treino diário encontrado.</p>';
+                    container.innerHTML = '<p class="text-gray-500">Nenhum treino disponível</p>';
                     return;
                 }
 
@@ -150,6 +202,8 @@
 
             } catch (error) {
                 console.error("Erro ao buscar dados:", error);
+                
+                // Mensagem de erro mais clara, capturando a mensagem retornada pelo Flask
                 const displayMessage = error.message.includes('HTTP')
                     ? "Erro de conexão com a API. Verifique se o servidor está rodando."
                     : error.message;
@@ -157,13 +211,22 @@
                 errorDiv.textContent = displayMessage;
                 errorDiv.classList.remove('hidden');
                 container.innerHTML = '';
+                treinoTitle.classList.add('hidden');
+
             } finally {
                 loading.classList.add('hidden');
+                fetchButton.disabled = false;
             }
         }
 
-        // Inicia o carregamento dos dados
-        window.onload = fetchTreino;
+        // Adiciona o listener ao botão de busca
+        fetchButton.addEventListener('click', fetchTreino);
+
+        // Carrega o treino do ID 1 por padrão ao iniciar
+        window.onload = () => {
+             // Damos um pequeno delay para garantir que o input inicial seja lido
+             setTimeout(fetchTreino, 50); 
+        }
     </script>
 </body>
 </html>
