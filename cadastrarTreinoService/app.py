@@ -98,6 +98,7 @@ def finalizar():
         "nome_professor": nome_professor
     }
     
+    # uso da interface (Facade)
     thread = threading.Thread(target=notificar_email_assincrono, args=(payload,))
     thread.start()
     
