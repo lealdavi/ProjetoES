@@ -3,9 +3,9 @@ import requests
 import psycopg2
 import threading
 import psycopg2.extras
-from item_treino import ItemTreino
-from treino_diario import TreinoDiario
-from treino_personalizado import TreinoPersonalizado
+from itemTreino import ItemTreino
+from treinoDiario import TreinoDiario
+from treinoPersonalizado import TreinoPersonalizado
 from flask import Flask, render_template, request
 from typing import Dict, Any
 
