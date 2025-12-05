@@ -50,7 +50,7 @@ def finalizar():
     conn.close()
     
     if res:
-        thread = threading.Thread(target=notificar_email_assincrono, args=({"email": res[0], "nome_professor": "Professor"},))
+        thread = threading.Thread(target=notificar_email_assincrono, args=({"email": res[0], "nome_professor": "Osmar Telo"},))
         thread.start()
     
     return """
