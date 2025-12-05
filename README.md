@@ -33,6 +33,26 @@ Abra seu navegador e acesse o Gateway principal:
 
 👉 [http://127.0.0.1:8080](http://127.0.0.1:8080)
 
+## 📬 Rodando o Serviço de Email (porta 5007)
+
+O serviço responsável por enviar notificações por e-mail (**Service Email**) roda de forma independente dos outros serviços.
+
+Ele **não é iniciado automaticamente pelo `run.py`**, portanto você deve iniciá-lo separadamente.
+
+### ▶️ Como rodar o serviço de e-mail
+
+Abra **um novo terminal** e vá para a pasta do serviço:
+
+```
+cd notificarEmailService
+```
+
+Então execute:
+
+```
+flask run --port 5007
+```
+
 ---
 
 ## 🏗️ Arquitetura e Serviços
