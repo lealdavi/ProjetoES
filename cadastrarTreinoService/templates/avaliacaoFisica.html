@@ -3,20 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <title>Avaliação Física</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
-    <h1>Avaliação física de {{aluno[1]}}</h1>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border border-gray-100">
+        
+        <div class="bg-indigo-600 p-6 text-white flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Relatório de Avaliação</h1>
+            <span class="bg-indigo-500 px-3 py-1 rounded-lg text-sm font-mono">Aluno ID: {{ id_aluno }}</span>
+        </div>
 
-    {% if resultado %}
-        <p><b>Idade:</b> {{ resultado[1] }} anos</p>
-        <p><b>Peso:</b> {{ resultado[2] }} kg</p>
-        <p><b>Altura:</b> {{ resultado[3] }} cm</p>
-        <p><b>Nível:</b> {{ resultado[4] }}</p>
-        <p><b>Frequência:</b> {{ resultado[5] }} vezes por semana</p>
-        <p><b>Doenças:</b> {{ resultado[6] }}</p>
-        <p><b>Limitações:</b> {{ resultado[7] }}</p>
-    {% endif %}
+        <div class="p-8">
+            {% if resultado %}
+            <div class="space-y-6">
+                <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800">{{ aluno[1] }}</h2> <!-- Nome do aluno -->
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">{{ resultado[4] }}</span> <!-- Nível -->
+                </div>
 
-<a href="/cadastrar">Voltar</a>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-xl">
+                        <span class="block text-xs text-gray-400 uppercase font-bold">Peso</span>
+                        <span class="text-2xl font-bold text-gray-800">{{ resultado[2] }} <span class="text-sm text-gray-500">kg</span></span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl">
+                        <span class="block text-xs text-gray-400 uppercase font-bold">Altura</span>
+                        <span class="text-2xl font-bold text-gray-800">{{ resultado[3] }} <span class="text-sm text-gray-500">m</span></span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl">
+                        <span class="block text-xs text-gray-400 uppercase font-bold">Idade</span>
+                        <span class="text-2xl font-bold text-gray-800">{{ resultado[1] }} <span class="text-sm text-gray-500">anos</span></span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl">
+                        <span class="block text-xs text-gray-400 uppercase font-bold">Frequência</span>
+                        <span class="text-2xl font-bold text-gray-800">{{ resultado[5] }}x <span class="text-sm text-gray-500">/semana</span></span>
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-2">
+                    <div>
+                        <span class="text-sm font-bold text-gray-500 uppercase">Histórico de Doenças</span>
+                        <p class="text-gray-800 bg-red-50 p-3 rounded-lg border border-red-100 mt-1">{{ resultado[6] }}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm font-bold text-gray-500 uppercase">Limitações Físicas</span>
+                        <p class="text-gray-800 bg-orange-50 p-3 rounded-lg border border-orange-100 mt-1">{{ resultado[7] }}</p>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-10 text-gray-400">
+                <p>Nenhuma avaliação cadastrada para este aluno.</p>
+            </div>
+            {% endif %}
+
+            <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                <a href="/professor/cadastrar" class="text-indigo-600 font-bold hover:underline">Voltar para Seleção</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

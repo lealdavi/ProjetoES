@@ -53,4 +53,4 @@ def fragmento_lista(user_id, letra):
 
 if __name__ == '__main__':
     # Roda na porta 5002
-    app.run(debug=True, port=5002)
+    app.run(debug=True, port=5003)

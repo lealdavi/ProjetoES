@@ -5,10 +5,11 @@
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="text-sm text-gray-500 border-b">
-                    <th class="py-2">Exercício</th>
-                    <th class="py-2 text-center">Séries</th>
-                    <th class="py-2 text-center">Reps</th>
-                    <th class="py-2 text-right">Ação</th>
+                    <th class="py-3">Exercício</th>
+                    <th class="py-3 text-center">Séries</th>
+                    <th class="py-3 text-center">Reps</th>
+                    <th class="py-3 text-center">Intervalo (s)</th>
+                    <th class="py-3 text-right pr-2">Ação</th>
                 </tr>
             </thead>
             <tbody>
@@ -21,6 +22,7 @@
                     <td class="py-3 font-medium text-gray-800">{{ item.nome }}</td>
                     <td class="py-3 text-center text-gray-600">{{ item.series }}</td>
                     <td class="py-3 text-center text-gray-600">{{ item.reps }}</td>
+                    <td class="py-3 text-center text-gray-600 font-mono text-sm">{{ item.intervalo }}s</td>
                     <td class="py-3 text-right">
                         <button onclick="carregarDetalhe({{ item.id }})" 
                                 class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-100 transition shadow-sm border border-blue-200">

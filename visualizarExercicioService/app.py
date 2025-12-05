@@ -43,4 +43,4 @@ def detalhar(id_exercicio):
 
 if __name__ == '__main__':
     # Roda na porta 5003
-    app.run(debug=True, port=5003)
+    app.run(debug=True, port=5004)
