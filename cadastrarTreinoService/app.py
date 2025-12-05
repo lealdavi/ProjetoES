@@ -37,6 +37,7 @@ def cadastrar():
     cursor.execute("SELECT * FROM usuario u LEFT JOIN avaliacao_fisica a ON a.id_usuario = u.id_usuario AND a.data_cadastro = (SELECT MAX(data_cadastro) FROM avaliacao_fisica WHERE id_usuario = u.id_usuario);")
     resultado = cursor.fetchall()
     conn.close()
+    resultado = sorted(resultado, key=lambda x: x["nome"])
     return render_template("usuarios.html", resultado=resultado)
 
 @app.route("/professor/finalizar")

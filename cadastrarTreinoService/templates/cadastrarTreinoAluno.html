@@ -52,15 +52,15 @@
                         <div class="flex gap-2">
                             <div class="flex flex-col">
                                 <span class="text-[10px] uppercase font-bold text-gray-400 mb-1">Séries</span>
-                                <input type="number" name="series_{{ exercicio['id_exercicio'] }}" class="w-20 p-2 border border-gray-300 rounded-lg text-center font-mono focus:border-indigo-500 focus:outline-none" placeholder="3">
+                                <input type="number" name="series_{{ exercicio['id_exercicio'] }}" class="w-20 p-2 border border-gray-300 rounded-lg text-center font-mono focus:border-indigo-500 focus:outline-none" placeholder="3" min="1">
                             </div>
                             <div class="flex flex-col">
                                 <span class="text-[10px] uppercase font-bold text-gray-400 mb-1">Reps</span>
-                                <input type="number" name="repeticoes_{{ exercicio['id_exercicio'] }}" class="w-20 p-2 border border-gray-300 rounded-lg text-center font-mono focus:border-indigo-500 focus:outline-none" placeholder="12">
+                                <input type="number" name="repeticoes_{{ exercicio['id_exercicio'] }}" class="w-20 p-2 border border-gray-300 rounded-lg text-center font-mono focus:border-indigo-500 focus:outline-none" placeholder="12" min="1">
                             </div>
                             <div class="flex flex-col">
                                 <span class="text-[10px] uppercase font-bold text-gray-400 mb-1">Intervalo (s)</span>
-                                <input type="number" name="intervalo_{{ exercicio['id_exercicio'] }}" class="w-20 p-2 border border-gray-300 rounded-lg text-center font-mono focus:border-indigo-500 focus:outline-none" placeholder="60">
+                                <input type="number" name="intervalo_{{ exercicio['id_exercicio'] }}" class="w-20 p-2 border border-gray-300 rounded-lg text-center font-mono focus:border-indigo-500 focus:outline-none" placeholder="60" min="1">
                             </div>
                         </div>
                     </div>
@@ -77,5 +77,31 @@
             </div>
         </form>
     </div>
+    <script>
+        document.querySelector("form").addEventListener("submit", function(e) {
+
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][name="exercicios_selecionados"]');
+            let erro = false;
+
+            checkboxes.forEach(chk => {
+                if (chk.checked) {
+                    const id = chk.value;
+
+                    const series = document.querySelector(`input[name="series_${id}"]`).value;
+                    const reps = document.querySelector(`input[name="repeticoes_${id}"]`).value;
+                    const intervalo = document.querySelector(`input[name="intervalo_${id}"]`).value;
+
+                    if (!series || series <= 0 || !reps || reps <= 0 || !intervalo || intervalo <= 0) {
+                        erro = true;
+                    }
+                }
+            });
+
+            if (erro) {
+                e.preventDefault(); // impede o envio!!
+                alert("⚠️ Preencha todos os campos do exercício selecionado");
+            }
+        });
+    </script>
 </body>
 </html>

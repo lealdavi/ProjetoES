@@ -9,7 +9,7 @@ def home():
     <html lang="pt-br">
     <head>
         <meta charset="UTF-8">
-        <title>Portal Academia - Gateway</title>
+        <title>Plano Personalizado - Gateway</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
         <style>body { font-family: 'Inter', sans-serif; }</style>
@@ -18,8 +18,7 @@ def home():
         <div class="max-w-5xl w-full text-center space-y-10">
             
             <div class="space-y-2">
-                <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight">Portal Academia</h1>
-                <p class="text-gray-500 text-lg">Arquitetura de Microsserviços</p>
+                <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight">Plano Personalizado</h1>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -56,7 +55,6 @@ def home():
 
             </div>
             
-            <p class="text-gray-400 text-xs">Sistema rodando via Gateway na porta 8080</p>
         </div>
 
         <script>
