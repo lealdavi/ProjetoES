@@ -38,7 +38,11 @@
                     <h2 class="text-4xl font-extrabold text-gray-800 group-hover:text-indigo-600 transition">Treino {{ sigla }}</h2>
                     <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded uppercase">Ver</span>
                 </div>
-                <p class="text-gray-400 mt-4 text-sm font-medium">Clique para visualizar os exercícios</p>
+                <ul class="text-gray-500 text-sm mt-2 ml-3 list-disc">
+                    {% for m in grupos.get(sigla, []) %}
+                        <li>{{ m }}</li>
+                    {% endfor %}
+                </ul>
             </div>
             {% else %}
             <div class="col-span-3 text-center py-16 bg-white rounded-2xl shadow-sm">

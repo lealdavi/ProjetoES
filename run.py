@@ -25,7 +25,7 @@ services_config = [
     },
     {
         "name": "API EXERCÍCIOS (Porta 5005)",
-        "folder": "listarExerciciosService",
+        "folder": "Exercicios",
         "cmd": ["uvicorn", "app:app", "--host", "127.0.0.1", "--port", "5005"]
     },
     {
