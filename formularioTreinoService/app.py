@@ -61,7 +61,7 @@ def criar_avaliacao():
         # T05: Armazenar string corretamente
         frequencia_str = str(dados['frequencia'])
         
-        data_cadastro = datetime.date.today()
+        data_cadastro = datetime.datetime.now().replace(microsecond=0)
 
         sql = """
             INSERT INTO avaliacao_fisica 
@@ -80,7 +80,7 @@ def criar_avaliacao():
             "message": "Dados registrados com sucesso.", # Mensagem conforme T02
             "id_avaliacao": novo_id,
             "imc_calculado": f"{imc:.2f}",
-            "data_cadastro": str(data_cadastro)
+            "data_cadastro": data_cadastro.strftime("%Y-%m-%d %H:%M:%S")
         }), 201
 
     except Exception as e:
